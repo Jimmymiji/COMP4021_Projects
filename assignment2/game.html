@@ -1,0 +1,373 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>SVG Game</title>
+  <script language="JavaScript" src="game.js"></script>
+  <script language="JavaScript" src="highscore.js"></script>
+</head>
+
+<body style="text-align: center">
+<svg width="800px" height="600px"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xhtml="http://www.w3.org/1999/xhtml"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:a="http://www.adobe.com/svg10-extensions" a:timeline="independent"
+     onload="top.load(evt)">
+<!--define some patterns-->
+  <defs>
+    <clipPath id="gameareaclip">
+      <rect x="20" y="20" width="600" height="560"/>
+    </clipPath>
+    <pattern id="background_pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" style="fill:yellow"/>
+      <circle cx="10" cy="10" r="8" style="fill:lightyellow"/>
+    </pattern>
+    <radialGradient id="player_color">
+      <stop offset="0.0" style="stop-color:yellow;stop-opacity:1"/>
+      <stop offset="0.8" style="stop-color:yellow;stop-opacity:1"/>
+      <stop offset="1.0" style="stop-color:orange;stop-opacity:1"/>
+    </radialGradient>
+    <g id="monster">
+      <path d="M0,30 q0,-30 20,-30 t20,30 l0,10 l-5,-7 l-5,7 l-5,-7 l-5,7 l-5,-7 l-5,7 l-5,-7 l-5,7 l0,-10"
+            style="fill:gray;fill-opacity:0.5;stroke:black;stroke-width:2"/>
+      <circle cx="12" cy="20" r="5" style="fill:yellow;stroke:black;stroke-width:2">
+        <animateColor attributeName="fill" values="yellow;red;yellow" dur="1s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="28" cy="20" r="5" style="fill:yellow;stroke:black;stroke-width:2">
+        <animateColor attributeName="fill" values="yellow;red;yellow" dur="1s" repeatCount="indefinite" />
+      </circle>
+    </g>
+    <g id="bullet">
+      <circle cx="5" cy="5" r="5" style="fill:red"/>
+      <circle cx="6" cy="3" r="1" style="fill:pink"/>
+    </g>
+      <g id="monster_bullet">
+          <circle cx="5" cy="5" r="5" style="fill:green" />
+          <circle cx="6" cy="3" r="1" style="fill:pink" />
+      </g>
+      <g id="candy" transform="scale(0.04)" style="fill:purple">
+          <path d="M460.141,76.8c-6.4-5.333-12.8-9.6-17.067-13.867s-8.533-12.8-13.867-20.267C418.541,23.467,405.741,0,381.208,0
+        c-22.4,0-41.6,20.267-64,68.267c-6.4,13.867-11.733,35.2-13.867,55.467c-7.467-5.333-17.067-8.533-26.667-8.533
+        c-12.8,0-25.6,4.267-34.133,13.867L129.475,242.133c-8.533,9.6-13.867,21.333-13.867,34.133c0,8.533,2.133,18.133,6.4,25.6
+        c-19.2,2.133-39.467,6.4-53.333,13.867c-46.933,22.4-67.2,40.533-68.267,62.933c-1.067,25.6,23.467,39.467,42.667,50.133
+        c8.533,5.333,16,9.6,20.267,13.867c3.2,4.267,8.533,10.667,12.8,17.067c13.867,20.267,28.8,41.6,53.333,41.6
+        c29.867,0,48-35.2,59.733-67.2c5.333-12.8,10.667-32,13.867-52.267c8.533,5.333,17.067,8.533,26.667,8.533
+        c12.8,0,24.533-4.267,34.133-13.867l113.067-113.067c17.067-17.067,19.2-42.667,5.333-60.8c17.067-2.133,36.267-6.4,52.267-12.8
+        c28.8-11.733,62.933-27.733,66.133-55.467C503.875,107.733,479.341,90.666,460.141,76.8z M150.808,421.333
+        c-10.667,27.733-18.133,36.267-21.333,38.4c-5.333-3.2-13.867-16-19.2-22.4c-5.333-8.533-11.733-17.067-18.133-23.467
+        c-7.467-8.533-18.133-13.867-28.8-20.267c-6.4-4.267-14.933-9.6-19.2-12.8c3.2-4.267,13.867-12.8,42.667-25.6
+        c13.867-6.4,35.2-10.667,54.4-10.667c10.667,0,17.067,1.067,19.2,2.133C164.675,355.2,163.608,387.2,150.808,421.333z
+         M347.075,233.6L234.008,346.666c-3.2,3.2-5.333,3.2-8.533,0l-66.133-66.133c-2.133-1.067-2.133-3.2-2.133-4.267
+        s1.067-3.2,2.133-4.267l113.067-113.067c1.067-2.133,3.2-2.133,4.267-2.133s3.2,0,4.267,2.133l66.133,66.133
+        C349.208,227.2,349.208,231.466,347.075,233.6z M420.675,150.4c-19.2,7.467-41.6,11.733-58.667,11.733
+        c-9.6,0-13.867-1.067-16-2.133c-3.2-9.6-3.2-48,9.6-73.6c12.8-28.8,21.333-39.467,25.6-42.667c3.2,4.267,8.533,12.8,11.733,19.2
+        c6.4,10.667,12.8,21.333,20.267,28.8c6.4,6.4,14.933,12.8,23.467,18.133c6.4,5.333,19.2,13.867,22.4,19.2
+        C456.941,132.266,448.408,139.733,420.675,150.4z" />
+      </g>
+  </defs>
+
+  <rect width="100%" height="100%" style="fill:url(#background_pattern);stroke:orange;stroke-width:4" />
+
+  <rect x="20" y="20" width="600" height="560" style="fill:black;stroke:red;stroke-width:5" />
+    <!--level info element-->
+    <g transform="translate(640, 20)">
+        <text x="70" y="0"
+              style="fill:blueviolet;font-size:30px;font-weight:bold;text-anchor:middle">
+            Level:
+        </text>
+        <rect x="0" y="10" width="140" height="35" style="fill:white" />
+        <text id="level_info" x="70" y="36"
+              style="fill:orange;font-size:25px;text-anchor:middle">0</text>
+    </g>
+    <!--add your score element here-->
+    <g transform="translate(640, 120)">
+      <text x="70" y="0"
+       style="fill:orange;font-size:25px;font-weight:bold;text-anchor:middle">
+        Score:
+      </text>
+      <rect x="0" y="10" width="140" height="35" style="fill:white" />
+      <text id="score" x="70" y="36"
+       style="fill:orange;font-size:25px;text-anchor:middle">0</text>
+    </g>
+    <!-- bullet info element-->
+    <g transform="translate(640, 220)">
+        <text x="70" y="0"
+              style="fill:orange;font-size:15px;font-weight:bold;text-anchor:middle">
+            Bullet Remaining:
+        </text>
+        <rect x="0" y="10" width="140" height="35" style="fill:white" />
+        <text id="bullet_info" x="70" y="36"
+              style="fill:orange;font-size:25px;text-anchor:middle">0</text>
+    </g>
+    <!-- time info element-->
+    <g transform="translate(640, 320)">
+        <text x="70" y="0"
+              style="fill:orange;font-size:17px;font-weight:bold;text-anchor:middle">
+            Time Remaining:
+        </text>
+        <rect x="0" y="10" width="140" height="35" style="fill:white" />
+        <text id="time_info" x="70" y="36"
+              style="fill:orange;font-size:25px;text-anchor:middle">60 s</text>
+    </g>
+   <!--game field-->
+  <g style="clip-path:url(#gameareaclip)">
+    <g transform="translate(20,20)">
+      <g id="gamearea" transform="translate(0,0)" width="600" height="560">
+        <rect x="0" y="0" width="600" height="560" style="fill:white" />
+          <!--exit point-->
+          <g id="exit" transform="translate(0,10) scale(0.1)" x="0" y="10">
+              <path style="fill:#0072A2;" d="M398.926,475.163H113.074V14.757c0-4.126,3.345-7.471,7.471-7.471h270.91
+            c4.126,0,7.471,3.345,7.471,7.471L398.926,475.163L398.926,475.163z" />
+              <path style="fill:#006289;" d="M391.455,7.287h-33.553c4.126,0,7.471,3.345,7.471,7.471v460.406h33.553V14.757
+            C398.926,10.631,395.581,7.287,391.455,7.287z" />
+              <path style="fill:#A0D860;" d="M147.292,475.163V46.528c0-4.647,3.767-8.414,8.414-8.414h200.59c4.647,0,8.414,3.767,8.414,8.414
+            v428.635L147.292,475.163L147.292,475.163z" />
+              <path style="fill:#61C979;" d="M356.296,38.114h-24.897c4.647,0,8.414,3.767,8.414,8.414v428.635h24.897V46.528
+            C364.71,41.881,360.942,38.114,356.296,38.114z" />
+              <g>
+                  <path style="fill:#F7F9F9;" d="M237.781,175.608h-57.105c-2.823,0-5.112-2.289-5.112-5.112V72.357c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C242.893,173.319,240.604,175.608,237.781,175.608z" />
+                  <path style="fill:#F7F9F9;" d="M331.324,175.608h-57.105c-2.823,0-5.112-2.289-5.112-5.112V72.357c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C336.436,173.319,334.147,175.608,331.324,175.608z" />
+                  <path style="fill:#F7F9F9;" d="M237.781,311.42h-57.105c-2.823,0-5.112-2.289-5.112-5.112v-98.139c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C242.893,309.131,240.604,311.42,237.781,311.42z" />
+                  <path style="fill:#F7F9F9;" d="M331.324,311.42h-57.105c-2.823,0-5.112-2.289-5.112-5.112v-98.139c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C336.436,309.131,334.147,311.42,331.324,311.42z" />
+                  <path style="fill:#F7F9F9;" d="M237.781,447.231h-57.105c-2.823,0-5.112-2.289-5.112-5.112V343.98c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C242.893,444.942,240.604,447.231,237.781,447.231z" />
+                  <path style="fill:#F7F9F9;" d="M331.324,447.231h-57.105c-2.823,0-5.112-2.289-5.112-5.112V343.98c0-2.823,2.289-5.112,5.112-5.112
+              h57.105c2.823,0,5.112,2.289,5.112,5.112v98.139C336.436,444.942,334.147,447.231,331.324,447.231z" />
+              </g>
+              <g>
+                  <path style="fill:#E4E4E4;" d="M331.324,67.245h-24.912c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112V72.357C336.436,69.534,334.147,67.245,331.324,67.245z" />
+                  <path style="fill:#E4E4E4;" d="M331.324,203.057h-24.912c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112v-98.139C336.436,205.346,334.147,203.057,331.324,203.057z" />
+                  <path style="fill:#E4E4E4;" d="M331.324,338.868h-24.912c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112V343.98C336.436,341.157,334.147,338.868,331.324,338.868z" />
+                  <path style="fill:#E4E4E4;" d="M237.781,67.245H212.87c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112V72.357C242.893,69.534,240.604,67.245,237.781,67.245z" />
+                  <path style="fill:#E4E4E4;" d="M237.781,203.057H212.87c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112v-98.139C242.893,205.346,240.604,203.057,237.781,203.057z" />
+                  <path style="fill:#E4E4E4;" d="M237.781,338.868H212.87c2.823,0,5.112,2.289,5.112,5.112v98.139c0,2.823-2.289,5.112-5.112,5.112
+              h24.912c2.823,0,5.112-2.289,5.112-5.112V343.98C242.893,341.157,240.604,338.868,237.781,338.868z" />
+              </g>
+              <path style="fill:#D96B37;" d="M427.835,504.713H84.166c-1.87,0-3.386-1.516-3.386-3.386v-25.546c0-1.87,1.516-3.386,3.386-3.386
+            h343.668c1.87,0,3.386,1.516,3.386,3.386v25.546C431.221,503.197,429.704,504.713,427.835,504.713z" />
+              <path style="fill:#B14418;" d="M427.835,472.395h-30.167v32.319h30.167c1.87,0,3.386-1.516,3.386-3.386v-25.546
+            C431.221,473.911,429.704,472.395,427.835,472.395z" />
+              <g>
+                  <path style="fill:#1A1A1A;" d="M237.781,59.959h-57.105c-6.836,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.837,5.562,12.399,12.398,12.399h57.105c6.836,0,12.398-5.562,12.398-12.399V72.357
+              C250.18,65.521,244.617,59.959,237.781,59.959z M235.607,168.322h-52.756v-93.79h52.756V168.322z" />
+                  <path style="fill:#1A1A1A;" d="M331.324,59.959H274.22c-6.837,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.837,5.562,12.399,12.398,12.399h57.104c6.837,0,12.398-5.562,12.398-12.399V72.357
+              C343.722,65.521,338.161,59.959,331.324,59.959z M329.149,168.322h-52.755v-93.79h52.755V168.322z" />
+                  <path style="fill:#1A1A1A;" d="M237.781,195.77h-57.105c-6.836,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.836,5.562,12.398,12.398,12.398h57.105c6.836,0,12.398-5.562,12.398-12.398v-98.139
+              C250.18,201.333,244.617,195.77,237.781,195.77z M235.607,304.133h-52.756v-93.789h52.756V304.133z" />
+                  <path style="fill:#1A1A1A;" d="M331.324,195.77H274.22c-6.837,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.836,5.562,12.398,12.398,12.398h57.104c6.837,0,12.398-5.562,12.398-12.398v-98.139
+              C343.722,201.333,338.161,195.77,331.324,195.77z M329.149,304.133h-52.755v-93.789h52.755V304.133z" />
+                  <path style="fill:#1A1A1A;" d="M237.781,331.582h-57.105c-6.836,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.836,5.562,12.398,12.398,12.398h57.105c6.836,0,12.398-5.562,12.398-12.398V343.98
+              C250.18,337.144,244.617,331.582,237.781,331.582z M235.607,439.944h-52.756v-93.789h52.756V439.944z" />
+                  <path style="fill:#1A1A1A;" d="M331.324,331.582H274.22c-6.837,0-12.398,5.562-12.398,12.398v98.139
+              c0,6.836,5.562,12.398,12.398,12.398h57.104c6.837,0,12.398-5.562,12.398-12.398V343.98
+              C343.722,337.144,338.161,331.582,331.324,331.582z M329.149,439.944h-52.755v-93.789h52.755V439.944z" />
+                  <path style="fill:#1A1A1A;" d="M427.835,465.108h-21.622V245.192c0-4.024-3.262-7.287-7.287-7.287s-7.287,3.262-7.287,7.287
+              v219.917h-19.643V46.528c0-8.657-7.043-15.701-15.7-15.701h-200.59c-8.658,0-15.701,7.043-15.701,15.701v418.58h-19.643V245.122
+              c0-4.024-3.262-7.287-7.287-7.287s-7.287,3.262-7.287,7.287v219.986H84.166c-5.885,0-10.673,4.788-10.673,10.673v25.547
+              c0,5.885,4.788,10.673,10.673,10.673h343.668c5.885,0,10.673-4.788,10.673-10.673v-25.547
+              C438.507,469.896,433.719,465.108,427.835,465.108z M154.577,46.528c0-0.622,0.506-1.128,1.128-1.128h200.591
+              c0.621,0,1.127,0.506,1.127,1.128v418.58H154.577V46.528z M423.934,497.427H88.066v-17.746h25.008h34.216h217.418h34.216h25.009
+              L423.934,497.427L423.934,497.427z" />
+                  <path style="fill:#1A1A1A;" d="M113.074,217.138c4.024,0,7.287-3.262,7.287-7.287V14.757c0-0.102,0.083-0.184,0.184-0.184h270.91
+              c0.102,0,0.184,0.083,0.184,0.184v195.702c0,4.024,3.262,7.287,7.287,7.287s7.287-3.262,7.287-7.287V14.757
+              C406.212,6.62,399.592,0,391.455,0h-270.91c-8.137,0-14.757,6.62-14.757,14.757v195.094
+              C105.788,213.876,109.05,217.138,113.074,217.138z" />
+              </g>
+          </g>
+        <g id="platforms">
+            <!-- 60 -->
+            <rect style="fill:orange" width="60" height="20" x="0" y="60"/>
+
+            <!-- 80 -->
+            <rect style="fill:orange" width="20" height="20" x="40" y="80"/>
+
+            <!-- 100 -->
+            <rect style="fill:orange" width="480" height="20" x="40" y="100"/>
+
+            <!-- 120 -->
+            <rect style="fill:orange" width="20" height="20" x="60" y="120"/>
+            <rect style="fill:orange" width="40" height="20" x="220" y="120"/>
+
+            <!-- 140 -->
+            <rect style="fill:orange" width="40" height="20" x="220" y="140"/>
+            <rect id="disappearing platform1" style="fill:red;opacity:0.5" width="40" height="20" x="560" y="140"/>
+
+            <!-- 160 -->
+            <rect style="fill:orange" width="120" height="20" x="180" y="160"/>
+            <rect style="fill:orange" width="60" height="20" x="540" y="160"/>
+
+            <!-- 180 -->
+            <rect style="fill:orange" width="20" height="20" x="0" y="180"/>
+            <rect style="fill:orange" width="20" height="20" x="100" y="180"/>
+            <rect style="fill:orange" width="20" height="20" x="380" y="180"/>
+            <rect style="fill:orange" width="80" height="20" x="520" y="180"/>
+
+            <!-- 200 -->
+            <rect style="fill:orange" width="20" height="20" x="0" y="200"/>
+            <rect style="fill:orange" width="40" height="20" x="80" y="200"/>
+            <rect style="fill:orange" width="80" height="20" x="360" y="200"/>
+
+            <!-- 220 -->
+            <rect style="fill:orange" width="160" height="20" x="0" y="220"/>
+            <rect id="disappearing platform2" style="fill:red;opacity:0.5" width="140" height="20" x="320" y="220"/>
+
+            <!-- 240 -->
+            <rect style="fill:orange" width="20" height="20" x="240" y="240"/>
+            <rect style="fill:orange" width="160" height="20" x="340" y="240"/>
+
+            <!-- 260 -->
+            <rect style="fill:orange" width="60" height="20" x="220" y="260"/>
+
+            <!-- 280 -->
+            <rect style="fill:orange" width="100" height="20" x="200" y="280"/>
+            <rect style="fill:orange" width="40" height="20" x="560" y="280"/>
+
+            <!-- 300 -->
+            <rect style="fill:orange" width="100" height="20" x="120" y="300"/>
+            <rect style="fill:orange" width="40" height="20" x="280" y="300"/>
+            <rect style="fill:orange" width="100" height="20" x="500" y="300"/>
+
+            <!-- 320 -->
+            <rect style="fill:orange" width="40" height="20" x="0" y="320"/>
+            <rect style="fill:orange" width="60" height="20" x="280" y="320"/>
+            <!--<rect style="fill:orange" width="20" height="20" x="380" y="320"/> -->
+
+            <!-- 340 -->
+            <rect style="fill:orange" width="60" height="20" x="0" y="340"/>
+            <rect style="fill:orange" width="20" height="20" x="320" y="340"/>
+            <!--<rect style="fill:orange" width="60" height="20" x="380" y="340"/>-->
+
+            <!-- 360 -->
+            <rect style="fill:orange" width="120" height="20" x="0" y="360"/>
+            <rect style="fill:orange" width="20" height="20" x="320" y="360"/>
+            <rect id="vertical platform"  style="fill:green" width="120" height="20" x="380" y="360"/>
+
+            <!-- 380 -->
+            <rect style="fill:orange" width="100" height="20" x="0" y="380"/>
+            <rect style="fill:orange" width="20" height="20" x="220" y="380"/>
+            <rect style="fill:orange" width="20" height="20" x="580" y="380"/>
+
+            <!-- 400 -->
+            <rect style="fill:orange" width="80" height="20" x="180" y="400"/>
+            <rect style="fill:orange" width="40" height="20" x="560" y="400"/>
+
+            <!-- 420 -->
+            <rect style="fill:orange" width="200" height="20" x="160" y="420"/>
+            <rect style="fill:orange" width="60" height="20" x="540" y="420"/>
+
+            <!-- 440 -->
+            <rect style="fill:orange" width="100" height="20" x="140" y="440"/>
+            <rect style="fill:orange" width="20" height="20" x="440" y="440"/>
+            <rect id="disappearing platform3" style="fill:red;opacity:0.5" width="60" height="20" x="500" y="440"/>
+
+            <!-- 460 -->
+            <rect style="fill:orange" width="60" height="20" x="120" y="460"/>
+            <rect style="fill:orange" width="60" height="20" x="400" y="460"/>
+
+            <!-- 480 -->
+            <rect style="fill:orange" width="40" height="20" x="0" y="480"/>
+            <rect style="fill:orange" width="60" height="20" x="380" y="480"/>
+
+            <!-- 500 -->
+            <rect style="fill:orange" width="60" height="20" x="0" y="500"/>
+            <rect style="fill:orange" width="20" height="20" x="260" y="500"/>
+
+            <!-- 520 -->
+            <rect style="fill:orange" width="80" height="20" x="0" y="520"/>
+            <rect style="fill:orange" width="20" height="20" x="140" y="520"/>
+            <rect style="fill:orange" width="80" height="20" x="240" y="520"/>
+            <rect style="fill:orange" width="20" height="20" x="500" y="520"/>
+
+            <!-- the floor -->
+            <rect style="fill:orange" width="600" height="20" x="0" y="540"/>
+        </g>
+        <g id="portal1" transform="translate(590,100)">
+            <ellipse cx="5" cy="20" rx="4" ry="19" style="fill:blue" />
+        </g>
+        <g id="portal2" transform="translate(0,280)">
+            <ellipse cx="5" cy="20" rx="4" ry="19" style="fill:red" />
+        </g>
+        <g id="monsters"/>
+        <g id="bullets"/>
+        <g id="monster_bullets"/>
+        <g id="candies"/>
+        <g id="player">
+          <circle cx="20" cy="20" r="20" style="fill:url(#player_color);stroke:black;stroke-width:2"/>
+          <ellipse cx="15" cy="15" rx="3" ry="6" style="fill:black"/>
+          <!--<ellipse cx="25" cy="15" rx="3" ry="6" style="fill:black"/>-->
+          <path d="M10,25 l20,0 q0,8 -10,8 t-10,-8" style="fill:orange;stroke:black;stroke-black:2"/>
+        </g>
+      </g>
+    
+        <!--add your highscore table here-->
+        <g id="highscoretable" transform="translate(40,40)">
+          <rect width="520" height="480"
+           style="fill:blueviolet;stroke:red;stroke-width:2"/>
+          <text x="260" y="40"
+           style="fill:red;font-size:30px;font-weight:bold;text-anchor:middle">
+            High Score Table
+          </text>
+          <text id="highscoretext" y="45"
+           style="font-size: 20px;font-weight:bold"/>
+        
+            <text x="60" y="403"
+                  style="font-size: 20px;font-weight:bold" >
+            Your Score:
+            </text>
+            <text id="currentscore" x="180" y="403"
+                  style="font-size: 20px;font-weight:bold; fill:red;font-weight:800">
+                999
+            </text>
+            <rect id="restartButton" onclick="top.initializeGame()" width="150" height="50" transform="translate(360,380)" style="fill:lightgreen;stroke:blue;stroke-width:3" />
+            <text x="380" y="413"
+                  style="font-size: 20px;font-weight:bold">
+                Try again!
+            </text>
+        </g>
+
+    </g>
+  </g>
+  <!-- start screen -->
+    <g id="startScreen" transform="translate(20,20)">
+        <rect width="760" height="560" style="fill:white;stroke:grey;stroke-width:5" />
+        <text id="titleText" x="325" y="100" style="font-family: Impact ; font-size: 60px; fill: yellowgreen; text-anchor: middle">Candy Hunter</text>
+        <text class="instruction_text" x="50" y="150">You are a candy-hunter who comes to collect candies</text>
+        <text class="instruction_text" x="50" y="175">Do NOT let the monsters touch you, or SHOOT them!</text>
+        <text class="instruction_text" x="50" y="200">You will get secore by collecting candy or shooting monster</text>
+        <text class="instruction_text" x="70" y="225">Good Luck Candy Hunter!</text>
+        <text class="instruction_text" x="50" y="250">Keys:</text>
+        <text class="instruction_text" x="70" y="275">W: Up</text>
+        <text class="instruction_text" x="70" y="300">A: Left</text>
+        <text class="instruction_text" x="70" y="325">D: Right</text>
+        <text class="instruction_text" x="70" y="350">C: Cheat Mode (Invincible and Infinite bullets)</text>
+        <text class="instruction_text" x="70" y="375">V: Exit Cheat Mode</text>
+        <text class="instruction_text" x="70" y="400">Space: Shoot</text>
+        <text x="400" y="550" style="font-family: Arial; font-size: 25px; fill: blue; text-anchor: middle">LU Chenbo</text>
+        <!--start button-->
+        <g onclick="top.initializeGame()">
+            <rect class="button" id="start button" x="280" y="450" width="200" height="50" rx="10" ry="10" style="fill:green"/>
+            <text class="button_text"  x="350" y="480">START</text>
+        </g>
+    </g>
+
+</svg>
+</body>
+
+</html>
