@@ -38,6 +38,7 @@ Player.prototype.isOnPlatform = function() {
         var y = parseFloat(node.getAttribute("y"));
         var w = parseFloat(node.getAttribute("width"));
         var h = parseFloat(node.getAttribute("height"));
+        /*
         if (node.getAttribute("id") == "vertical platform"){
             var direction = node.getAttribute("direction");
             if (direction == DIRECTION.UP)
@@ -45,7 +46,7 @@ Player.prototype.isOnPlatform = function() {
             if (direction == DIRECTION.DOWN)
                 y = y + PLATFORM_SPEED;
         }
-        
+        */
 
         if (((this.position.x + PLAYER_SIZE.w > x && this.position.x < x + w) ||
             ((this.position.x + PLAYER_SIZE.w) == x && this.motion == motionType.RIGHT) ||
@@ -133,38 +134,26 @@ Player.prototype.collideScreen = function(position) {
     }
 }
 
-
-//
-// Below are constants used in the game
-//
 var PLAYER_SIZE = new Size(40, 40);         // The size of the player
 var SCREEN_SIZE = new Size(600, 560);       // The size of the game screen
-var PLAYER_INIT_POS  = new Point(0, 420);   // The initial position of the player
-
+var PLAYER_INIT_POS  = new Point(0, 420);   // The initial position of the playe
 var MOVE_DISPLACEMENT = 5;                  // The speed of the player in motion
 var JUMP_SPEED = 15;                        // The speed of the player jumping
 var VERTICAL_DISPLACEMENT = 1;              // The displacement of vertical speed
-
-var GAME_INTERVAL = 25;                     // The time interval of running the game
-
+var GAME_INTERVAL = 25;                     // The time interval of running the gam
 var BULLET_SIZE = new Size(10, 10);         // The speed of a bullet
 var BULLET_SPEED = 10.0;                    // The speed of a bullet
                                             //  = pixels it moves each game loop
 var SHOOT_INTERVAL = 200.0;                 // The period when shooting is disabled
 var canShoot = true;                        // A flag indicating whether the player can shoot a bullet
-
 var MONSTER_SIZE = new Size(40, 40);        // The speed of a bullet
 var score = 0;
 var DIRECTION = { LEFT: 0, RIGHT: 1, UP: 3, DOWN: 4 };    // the dirction of a moving object
-
 var CANDY_SIZE = new Size(20, 20);
 var PLATFORM_SPEED = 1;                     // speed of vertical platform
 var EXIT_SIZE = new Size(20, 40);
-//
-// Variables in the game
-//
-var motionType = {NONE:0, LEFT:1, RIGHT:2}; // Motion enum
 
+var motionType = {NONE:0, LEFT:1, RIGHT:2}; // Motion enum
 var player = null;                          // The player object
 var gameInterval = null;                    // The interval
 var svgdoc = null;                          // svg document
@@ -182,9 +171,7 @@ var time_remaining = 0;
 var level = 0;
 var cheatMode = false;
 var numOfCandies = 8;
-//
-// The load function
-//
+
 function load(evt) {
    // alert("successfully load");
     svgdoc = evt.target.ownerDocument;
@@ -218,10 +205,16 @@ function startGame() {
     // Create  monsters randomly
     createMonsterGroup(numOfMonsters);
     createGroupCandy(numOfCandies);
+    // user name handle
+    svgdoc.getElementById("nameValue").firstChild.data = usr_name;
+    namePlace = svgdoc.createElementNS("http://www.w3.org/2000/svg", "use");
+    namePlace.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#name");
+    svgdoc.getElementById("playerName").appendChild(namePlace);
+    namePlace.setAttribute("x", 0)//player.position.x + 20);
+    namePlace.setAttribute("y", 0)//player.position.y + 20);
     // Start the game interval
     gameInterval = setInterval("gamePlay()", GAME_INTERVAL);
     timeInterval = setInterval("timer()", 1000);
-
     document.getElementById("level_info").firstChild.data = level;
     bgm_audio.play();
 }
@@ -235,7 +228,6 @@ function createCandy(x, y) {
     svgdoc.getElementById("candies").appendChild(candy);
 }
 
-
 function createGroupCandy(num) {
     for (i = 0; i < num; i++) {
         var x = 0, y = 0;
@@ -243,8 +235,16 @@ function createGroupCandy(num) {
             x = Math.floor(Math.random() * (SCREEN_SIZE.w - CANDY_SIZE.w));
             y = Math.floor(Math.random() * (SCREEN_SIZE.h - CANDY_SIZE.h));
             candyPos = new Point(x, y);
-        } while (intersect(PLAYER_INIT_POS, PLAYER_SIZE, candyPos, CANDY_SIZE)||(candyTouchPlatform(candyPos)));
+        } while (intersect(PLAYER_INIT_POS, PLAYER_SIZE, candyPos, CANDY_SIZE) || (candyTouchPlatform(candyPos)) || candyTouchCandy(candyPos));
         createCandy(x, y);
+    }
+}
+
+function clearCandies() {
+    var candies = svgdoc.getElementById("candies");
+    for (var i = 0; i < candies.childNodes.length; i++) {
+        var Node = candies.childNodes.item(i);
+        candies.removeChild(Node);
     }
 }
 
@@ -254,30 +254,47 @@ function candyTouchPlatform(position) {
         var node = platforms.childNodes.item(i);
         if (node.nodeName != "rect") continue;
 
-        var x = parseFloat(node.getAttribute("x"));
-        var y = parseFloat(node.getAttribute("y"));
-        var w = parseFloat(node.getAttribute("width"));
-        var h = parseFloat(node.getAttribute("height"));
+        var x = parseInt(node.getAttribute("x"));
+        var y = parseInt(node.getAttribute("y"));
+        var w = parseInt(node.getAttribute("width"));
+        var h = parseInt(node.getAttribute("height"));
         var pos = new Point(x, y);
         var size = new Size(w, h);
 
-        if (overlap(position, CANDY_SIZE, pos, size))
+        if (intersect(position, CANDY_SIZE, pos, size))
         {
-            alert("haha");
             return true;
         }
     }
     return false;
 }
-//
-// This function creates the monsters in the game
-//
+
+function candyTouchCandy(position) {
+    var candies = document.getElementById("candies");
+    if (!candies)
+    {
+        return false;
+    }
+    for (var i = 0; i < candies.childNodes.length; i++) {
+        var node = candies.childNodes.item(i);
+
+        var x = parseInt(node.getAttribute("x"));
+        var y = parseInt(node.getAttribute("y"));
+        var pos = new Point(x, y);
+
+        if (intersect(position, CANDY_SIZE, pos, CANDY_SIZE)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function createMonster(x, y) {
     var monster = svgdoc.createElementNS("http://www.w3.org/2000/svg", "use");
     var monPos = new Point(x,y);
 
-    monster.setAttribute("x", monPos.x);
-    monster.setAttribute("y", monPos.y);
+    monster.setAttribute("cx", monPos.x);
+    monster.setAttribute("cy", monPos.y);
 
     //set moving destination
     var monsterFinalPos = new Point(Math.floor(Math.random() * 520 + 40), Math.floor(Math.random() * 480) + 40);
@@ -297,9 +314,8 @@ function createMonster(x, y) {
 function createShootingMonster(x, y) {
     var monster = svgdoc.createElementNS("http://www.w3.org/2000/svg", "use");
     var monPos = new Point(x, y);
-
-    monster.setAttribute("x", monPos.x);
-    monster.setAttribute("y", monPos.y);
+    monster.setAttribute("cx", monPos.x);
+    monster.setAttribute("cy", monPos.y);
 
     //set moving destination
     var monsterFinalPos = new Point(Math.floor(Math.random() * 520 + 40), Math.floor(Math.random() * 480) + 40);
@@ -334,8 +350,8 @@ function createMonsterGroup(num) {
 function monsterTooClose(x, y) {
     for (var j = 0; j < monsters.childNodes.length; j++) {
         var monster = monsters.childNodes.item(j);
-        var mx = parseInt(monster.getAttribute("x"));
-        var my = parseInt(monster.getAttribute("y"));
+        var mx = parseInt(monster.getAttribute("cx"));
+        var my = parseInt(monster.getAttribute("cy"));
         if ((mx - x) * (mx - x) + (my - y) * (my - y) < ((MONSTER_SIZE.h / 2) * (MONSTER_SIZE.h / 2) + (MONSTER_SIZE.w / 2) * (MONSTER_SIZE.w / 2)))
             return true;
     }
@@ -343,44 +359,45 @@ function monsterTooClose(x, y) {
 }
 
 function moveMonsters() {
-    // Go through all monsters
     var monsters = svgdoc.getElementById("monsters");
     for (var i = 0; i < monsters.childNodes.length; i++) {
-        var monNode = monsters.childNodes.item(i);
+        var monster = monsters.childNodes.item(i);
 
-        if (parseInt(monNode.getAttribute("x")) == parseInt(monNode.getAttribute("Dx")) && parseInt(monNode.getAttribute("y")) == parseInt(monNode.getAttribute("Dy"))) {
+        if (parseInt(monster.getAttribute("cx")) == parseInt(monster.getAttribute("Dx")) && parseInt(monster.getAttribute("cy")) == parseInt(monster.getAttribute("Dy"))) {
 
             var monsterFinalPos = new Point(Math.floor(Math.random() * 500), Math.floor(Math.random() * 350));
-            monNode.setAttribute("Dx", monsterFinalPos.x);
-            monNode.setAttribute("Dy", monsterFinalPos.y);
-
-            var check = monsterFinalPos.x - parseInt(monNode.getAttribute("x")) < 0 ? 1 : 0;
-            if (check != parseInt(monNode.getAttribute("flip"))) {
-                monNode.setAttribute("flip", check);
+            monster.setAttribute("Dx", monsterFinalPos.x);
+            monster.setAttribute("Dy", monsterFinalPos.y);
+            monster.setAttribute("flip", monsterFinalPos.x - parseInt(monster.getAttribute("cx")) < 0 ? 1 : 0);
+            /*
+            var check = monsterFinalPos.x - parseInt(monster.getAttribute("x")) < 0 ? 1 : 0;
+            if (check != parseInt(monster.getAttribute("flip"))) {
+                monster.setAttribute("flip", check);
             }
+            */
         }
-        else if (parseInt(monNode.getAttribute("x")) == parseInt(monNode.getAttribute("Dx")) && parseInt(monNode.getAttribute("y")) != parseInt(monNode.getAttribute("Dy"))) {
+        else if (parseInt(monster.getAttribute("cx")) == parseInt(monster.getAttribute("Dx")) && parseInt(monster.getAttribute("cy")) != parseInt(monster.getAttribute("Dy"))) {
             var y_displacement = 1;
-            if (parseInt(monNode.getAttribute("y")) > parseInt(monNode.getAttribute("Dy")))
+            if (parseInt(monster.getAttribute("cy")) > parseInt(monster.getAttribute("Dy")))
                 y_displacement *= -1;
-            monNode.setAttribute("y", parseInt(monNode.getAttribute("y")) + y_displacement);
+            monster.setAttribute("cy", parseInt(monster.getAttribute("cy")) + y_displacement);
         }
-        else if (parseInt(monNode.getAttribute("x")) != parseInt(monNode.getAttribute("Dx")) && parseInt(monNode.getAttribute("y")) == parseInt(monNode.getAttribute("Dy"))) {
+        else if (parseInt(monster.getAttribute("cx")) != parseInt(monster.getAttribute("Dx")) && parseInt(monster.getAttribute("cy")) == parseInt(monster.getAttribute("Dy"))) {
             var x_displacement = 1;
-            if (parseInt(monNode.getAttribute("flip")))
+            if (parseInt(monster.getAttribute("flip")))
                 x_displacement *= -1;
-            monNode.setAttribute("x", parseInt(monNode.getAttribute("x")) + x_displacement);
+            monster.setAttribute("cx", parseInt(monster.getAttribute("cx")) + x_displacement);
         }
         else {
             var y_displacement = 1;
-            if (parseInt(monNode.getAttribute("y")) > parseInt(monNode.getAttribute("Dy")))
+            if (parseInt(monster.getAttribute("cy")) > parseInt(monster.getAttribute("Dy")))
                 y_displacement *= -1;
-            monNode.setAttribute("y", parseInt(monNode.getAttribute("y")) + y_displacement);
+            monster.setAttribute("cy", parseInt(monster.getAttribute("cy")) + y_displacement);
 
             var x_displacement = 1;
-            if (parseInt(monNode.getAttribute("flip")))
+            if (parseInt(monster.getAttribute("flip")))
                 x_displacement *= -1;
-            monNode.setAttribute("x", parseInt(monNode.getAttribute("x")) + x_displacement);
+            monster.setAttribute("cx", parseInt(monster.getAttribute("cx")) + x_displacement);
 
         }
     }
@@ -398,11 +415,10 @@ function monsterShootBullet() {
             monsterShoot = false;
             return;
         }
-        var x = parseInt(shootingMonster.getAttribute('x')) + MONSTER_SIZE.w / 2;
-        var y = parseInt(shootingMonster.getAttribute('y')) + MONSTER_SIZE.h / 2;
+        var x = parseInt(shootingMonster.getAttribute('cx')) + MONSTER_SIZE.w / 2;
+        var y = parseInt(shootingMonster.getAttribute('cy')) + MONSTER_SIZE.h / 2;
         monsterBullet.setAttribute("x", x);
         monsterBullet.setAttribute("y", y);
-        //alert("haha");
         monsterBullet.setAttribute("direction", 1- parseInt(shootingMonster.getAttribute("flip")));
         monsterBullet.setAttribute("id","monsterBullet");
         monsterBullet.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#bullet");
@@ -411,9 +427,15 @@ function monsterShootBullet() {
     }
     
 }
-//
-// This function shoots a bullet from the player
-//
+
+function clearMonsters() {
+    var monsters = svgdoc.getElementById("monsters");
+    for (var i = 0; i < monsters.childNodes.length; i++) {
+        var monster = monsters.childNodes.item(i);
+        monsters.removeChild(monster);
+    }
+}
+
 function shootBullet() {
     // Disable shooting for a short period of time
     if (bullet_remaining <= 0 && (!cheatMode))
@@ -433,12 +455,8 @@ function shootBullet() {
     document.getElementById("bullets").appendChild(bullet);
 }
 
-
-//
-// This is the keydown handling function for the SVG document
-//
 function keydown(evt) {
-    var keyCode = (evt.keyCode)? evt.keyCode : evt.getKeyCode();
+    var keyCode = (evt.keyCode)? evt.keyCode : this.evt.getKeyCode();
 
     switch (keyCode) {
         case "A".charCodeAt(0):
@@ -476,10 +494,6 @@ function keydown(evt) {
     }
 }
 
-
-//
-// This is the keyup handling function for the SVG document
-//
 function keyup(evt) {
     // Get the key code
     var keyCode = (evt.keyCode)? evt.keyCode : evt.getKeyCode();
@@ -497,18 +511,14 @@ function keyup(evt) {
     }
 }
 
-
-//
-// This function checks collision
-//
 function collisionDetection() {
     // Check whether the player collides with a monster
     transmission();
     var monsters = document.getElementById("monsters");
     for (var i = 0; i < monsters.childNodes.length; i++) {
         var monster = monsters.childNodes.item(i);
-        var x = parseInt(monster.getAttribute("x"));
-        var y = parseInt(monster.getAttribute("y"));
+        var x = parseInt(monster.getAttribute("cx"));
+        var y = parseInt(monster.getAttribute("cy"));
 
         if (intersect(new Point(x, y), MONSTER_SIZE, player.position, PLAYER_SIZE) && (!cheatMode)) {
             player_die_audio.play();
@@ -535,8 +545,8 @@ function collisionDetection() {
 
         for (var j = 0; j < monsters.childNodes.length; j++) {
             var monster = monsters.childNodes.item(j);
-            var mx = parseInt(monster.getAttribute("x"));
-            var my = parseInt(monster.getAttribute("y"));
+            var mx = parseInt(monster.getAttribute("cx"));
+            var my = parseInt(monster.getAttribute("cy"));
 
             if (intersect(new Point(x, y), BULLET_SIZE, new Point(mx, my), MONSTER_SIZE)) {
                 monster_die_audio.play();
@@ -554,10 +564,6 @@ function collisionDetection() {
     
 }
 
-
-//
-// This function updates the position of the bullets
-//
 function moveBullets() {
     // Go through all bullets
     var bullets = document.getElementById("bullets");
@@ -596,10 +602,6 @@ function moveBullets() {
     }
 }
 
-
-//
-// This function updates the position and motion of the player in the system
-//
 function gamePlay() {
     // Check collisions
     collisionDetection();
@@ -651,6 +653,7 @@ function gamePlay() {
     updateScreen();
     if (checkExit())
     {
+        exit_audio.play();
         levelUp();
     }
 }
@@ -668,11 +671,7 @@ function collectCandy() {
         }
     }
 }
-//
-// This function updates the position of the player's SVG object and
-// set the appropriate translation of the game screen relative to the
-// the position of the player
-//
+
 function updateScreen() {
     // Transform the player
     // if it is facing right and need to move left, we need to flip it
@@ -682,6 +681,19 @@ function updateScreen() {
     else {
         player.node.setAttribute("transform", "translate(" + player.position.x + "," + player.position.y + ")");
     }
+    for (var i = 0; i < monsters.childNodes.length; i++) {
+        var monster = monsters.childNodes.item(i);
+        var tx = parseInt(monster.getAttribute("cx"));
+        var ty = parseInt(monster.getAttribute("cy"));
+        if (parseInt(monster.getAttribute("flip"))) {
+            monster.setAttribute("transform", "translate(" +tx + "," + ty + ")" + "translate(" + MONSTER_SIZE.w + ", 0) scale(-1,1)");
+        }
+        else
+        {
+           monster.setAttribute("transform", "translate(" + tx + "," + ty + ")");
+        }
+    
+    }
     collectCandy();
     if (!cheatMode) {
         document.getElementById("bullet_info").firstChild.data = bullet_remaining;
@@ -689,12 +701,15 @@ function updateScreen() {
     else {
         document.getElementById("bullet_info").firstChild.data = "Infinite";
     }
+    document.getElementById("name").setAttribute("transform", "translate(" + (player.position.x + 20) + "," + (player.position.y) + ")");
 }
 
 function initializeGame() {
    // alert("initializeGame()");
     usr_name = prompt("Please enter your name: ", usr_name);
-    if (usr_name.length == 0 || usr_name == 'null' || usr_name == "" || usr_name == null)
+    if (usr_name == 'null' || usr_name == "" || usr_name == null)
+        usr_name = "Anonymous";
+    if (usr_name.length == 0)
         usr_name = "Anonymous";
     document.getElementById("startScreen").style.setProperty("visibility", "hidden", null);
     document.getElementById("highscoretable").style.setProperty("visibility", "hidden", null);
@@ -742,7 +757,6 @@ function gameOver() {
 }
 
 function movePlatform() {
-   // alert("haha");
     var verticalPlatform = document.getElementById("vertical platform");
     // Update the position of the vertical_platform
     var y = parseInt(verticalPlatform.getAttribute("y"));
@@ -794,7 +808,6 @@ function checkExit() {
     var exitPosition = new Point(x,y);
     if (intersect(player.position, PLAYER_SIZE, exitPosition, EXIT_SIZE)) {
         if (document.getElementById("candies").childNodes.length == 0)
-            alert("level up");
             return true;
     }
     return false;
@@ -810,15 +823,26 @@ function levelUp() {
     numOfMonsters += 4;
     bullet_remaining = 8;
     time_remaining = 60;
+    cheatMode = false;
+    monsterShoot = true;
     clearInterval(gameInterval);
     clearInterval(timeInterval);
+    cleanGroupById("monsters");
+    cleanGroupById("candies");
+    cleanGroupById("bullets");
+    cleanGroupById("monster_bullets");
+    cleanDisappearingPlatforms();
+    createDisappearingPlatforms();
     player.position = PLAYER_INIT_POS;
     startGame();
 }
+
 function cleanGroupById(id) {
-    var parent = document.getElementById(id);
+    var parent = svgdoc.getElementById(id);
+    if (!parent)
+        return;
     while (parent.firstChild) {
-        parent.removeChild(myNode.firstChild);
+        parent.removeChild(parent.firstChild);
     }
 }
 
@@ -826,36 +850,58 @@ function cleanDisappearingPlatforms() {
     var p1 = document.getElementById("disappearing platform1");
     var p2 = document.getElementById("disappearing platform2");
     var p3 = document.getElementById("disappearing platform3");
-    if (p1)
+    if (p1) {
         document.getElementById("platforms").removeChild(p1);
-    if (p2)
+    }
+    if (p2) {
         document.getElementById("platforms").removeChild(p2);
-    if (p3)
+    }
+    if (p3) {
         document.getElementById("platforms").removeChild(p3);
-
+    }
 }
+
+function createDisappearingPlatforms() {
+    createDisappearingPlatform(320,220,140,20,2);
+    createDisappearingPlatform(500,440,60,20,3);
+    createDisappearingPlatform(560,140,40,20,1);
+}
+
+function createDisappearingPlatform(x, y, width, height,idx) {
+    var platform = svgdoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    platform.id = "disappearing platform" + idx;
+    platform.setAttribute('x', x);
+    platform.setAttribute('y', y);
+    platform.setAttribute('width', width);
+    platform.setAttribute('height', height);
+    platform.style.setProperty('fill', 'red', null);
+    platform.style.setProperty('opacity', 0.5, null);
+    svgdoc.getElementById('platforms').appendChild(platform);
+}
+
 function restart() {
-    // Remove other things
-    cleanUpGroup("highscoreText", false);
+    //clean
     cleanGroupById("monsters");
     cleanGroupById("candies");
     cleanGroupById("bullets");
     cleanGroupById("monster_bullets");
+    cleanGroupById("highscoretext");
     cleanDisappearingPlatforms();
-    createDisappearingPlatforms();
-
-    // clear sunlights
-    clearSunlights();
-    clearZombies();
-    // other staff
+    clearInterval(gameInterval);
+    clearInterval(timeInterval);
+    //variables
     score = 0;
+    level = 1;
     cheatMode = false;
-    zoom = 1.0
-    numberOfSunlights = 0;
-    Zoom = false;
-    zombieCanShoot = true;
-    playerObject.setAttribute("opacity", 1.0);
+    monsterShoot = true;
+    bullet_remaining = 8;
+    time_remaining = 60;
+    numOfMonsters = 1;
+    player.position = PLAYER_INIT_POS;
     // Initialize the game
-    svgdoc.getElementById("highscoreTable").style.setProperty("visibility", "hidden", null);
+    svgdoc.getElementById("highscoretable").style.setProperty("visibility", "hidden", null);
     svgdoc.getElementById('startScreen').style.setProperty("visibility", "visible", null);
+    document.getElementById("score").firstChild.data = score;
+    createDisappearingPlatforms();
+    initializeGame();
 }
