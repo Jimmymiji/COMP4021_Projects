@@ -2,10 +2,10 @@
 
 require_once('xmlHandler.php');
 
-if (!isset($_COOKIE["name"])) {
-    header("Location: error.html");
-    exit;
-}
+// if (!isset($_COOKIE["name"])) {
+//    header("Location: error.html");
+//     exit;
+// }
 
 // create the chatroom xml file handler
 $xmlh = new xmlHandler("chatroom.xml");
@@ -31,16 +31,19 @@ if (!$xmlh->fileExist()) {
 $xmlh->openFile();
 $usrs = $xmlh->getChildNodes("user");
 foreach ($usrs as $usr) {
-    if($usr->getAttribute("name") == $_COOKIE["name"])
+    if($usr->getAttribute("name") ==  $_POST["name"])
     {
         $usr->parentNode->removeChild($usr);
     }
 }
 $xmlh->saveFile();
 // delete user photo
-unlink("images/".$_COOKIE["name"].".png");
+unlink("images/".$_POST["name"].".png");
 // clean cookie
-setcookie("name","");
+if (isset($_COOKIE["name"]))
+{
+    setcookie("name","");
+}
 // reload
 //echo "<script>window.parent.frames['message'].document.getElementById('username').setAttribute('value','');</script>";
 echo "<script>window.parent.location.reload()</script>";

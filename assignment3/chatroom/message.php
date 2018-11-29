@@ -173,7 +173,7 @@ print "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
                         if (url != null && url != "") {
                             var urlNode = document.createElementNS("http://www.w3.org/2000/svg", "a");
                             urlNode.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", url);
-                            urlNode.setAttribute("style", "text-decoration:underline");
+                            urlNode.setAttribute("style", "text-decoration:underline;fill:"+color);
                             urlNode.appendChild(document.createTextNode(url));
                             // make it open a new window
                             urlNode.setAttribute("target", "_blank");

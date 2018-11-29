@@ -39,14 +39,23 @@ if(isset($_FILES["usrimg"]))
     $file_type = strtolower(end(explode('.',$_FILES["usrimg"]["name"])));
     $file_tmp = $_FILES["usrimg"]["tmp_name"];
     $extension = array("jpeg","jpg","png");
-    if(!in_array($file_type,$extension)){
+    if ($_FILES["usrimg"]["size"] > 2000000 || $_FILES["usrimg"]["size"] == 0 ) {
+        $error = "Uploaded image is too large";
+        print_r($error);
+        header("Location: error.html");
+    }
+    else
+    {
+        if(!in_array($file_type,$extension)){
         $error = "Wrong file type or no photo submitted, please choose a JPG or PNG file\n ";
         print_r($error);
-    }
-    else{
+        header("Location: error.html");
+        }
+        else{
         move_uploaded_file($file_tmp,"images/".$_POST["name"].".png");
         echo "Sucessfully upload file";
         header("Location: client.php");
+        }
     }
 }
 // Cookie done, redirect to client.php (to avoid reloading of page from the client)

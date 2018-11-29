@@ -23,7 +23,7 @@ print "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 
             //delete this line 
             //window.parent.frames["message"].document.getElementById("username").setAttribute("value", name)
-
+             document.getElementById("name").value = name;
             setTimeout("document.getElementById('msg').focus()",100);
         }
         function select(color){
@@ -64,6 +64,7 @@ print "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
             <table border="0" cellspacing="5" cellpadding="0">
                 <tr>
                     <td><input class="button" type="submit" value="Log Out" style="width: 200px" /></td>
+                     <td><input class="text" type="hidden" name="name" id="name" value=""/></td>
                 </tr>
             </table>
         </form>
